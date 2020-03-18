@@ -42,7 +42,7 @@ create table if not exists TP2.pays(
 	on update cascade
 	on delete restrict;
  
-  insert into TP2.pays(id_pays, nom_pays, id_ville, id_langue) 
+ insert into TP2.pays(id_pays, nom_pays, id_ville, id_langue) 
  values(1, "France", 1, 1), (1, "France", 1, 2),
  (2, "Australie", 3, 2), (3, "Espagne", 4, 3), (4, "Royaume_Uni", 5, 2), (5, "Italie", 6, 5), (6, "Etats_Unis", 7, 2), (6, "Etats_Unis", 8, 2), (7, "Allemagne", 9, 4)
 ;
@@ -53,3 +53,4 @@ values("français"), ("anglais"), ("espagnol"), ("allemand"), ("italien")
 
 insert into tp2.ville(nom_ville)
 values("Paris"), ("Lille"), ("Sydney"), ("Madrid"), ("Londres"), ("Rome"), ("Miami"), ("Chicago"), ("Berlin")
+;
