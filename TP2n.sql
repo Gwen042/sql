@@ -53,3 +53,8 @@ from tp2n.pays p
 where p.id_pays = lp.id_pays
 and lp.id_langue = l.id_langue
 and l.id_langue = 2;
+
+select nom_pays
+from tp2n.langue_pays lp inner join tp2n.pays p on p.id_pays = lp.id_pays
+	inner join tp2n.langue l on lp.id_langue = l.id_langue
+where l.id_langue = 2;
