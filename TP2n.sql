@@ -45,3 +45,11 @@ alter table tp2n.langue_pays add constraint foreign key (id_langue)
  references langue(id_langue)
 	on update cascade
 	on delete restrict;
+    
+select nom_pays 
+from tp2n.pays p
+, tp2n.langue_pays lp
+, tp2n.langue l 
+where p.id_pays = lp.id_pays
+and lp.id_langue = l.id_langue
+and l.id_langue = 2;
