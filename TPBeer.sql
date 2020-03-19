@@ -2,7 +2,7 @@
 
 select v.numero_ticket
 from ventes v 
-where v.id_article = 50;
+where v.id_article = 500;
 
 -- 2. Afficher les tickets du 15/01/2014.
 
@@ -30,7 +30,7 @@ where v.QUANTITE >= 50;
 select t.numero_ticket
 , t.DATE_VENTE
 from ticket t
-where t.date_vente like "2014-03-%%";
+where t.date_vente like "2014-03-%";
 
 -- 6. Quelles sont les tickets émis entre les mois de mars et avril 2014 ?
 
@@ -108,12 +108,11 @@ where v.QUANTITE in
 		(select
 		v.QUANTITE
 		from ventes v 
-		where v.QUANTITE < 50)
+		where v.QUANTITE <= 50)
 group by t.NUMERO_TICKET
 having quantité_totale > 500
 order by quantité_totale desc
 ;
- 
 
 -- 13. Lister les bières de type ‘Trappiste’. (id, nom de la bière, volume et titrage)
 
@@ -249,3 +248,100 @@ where a.TITRAGE >
     where t.NOM_TYPE = "Trappiste"
     )
 ;
+
+-- 24. Editer les quantités vendues pour chaque couleur en 2014.
+
+select c.nom_couleur
+, sum(v.quantite) quantité_vendue
+from article a inner join ventes v on a.ID_ARTICLE = v.ID_ARTICLE
+				inner join couleur c on a.ID_Couleur = c.ID_Couleur
+where v.ANNEE = 2014
+group by c.NOM_COULEUR
+;
+
+-- 25. Donner pour chaque fabricant, le nombre de tickets sur lesquels apparait un de ses produits en 2014.
+
+select
+	f.NOM_FABRICANT
+    , count(v.NUMERO_TICKET) nb_tickets
+from marque m inner join fabricant f on f.id_fabricant = m.id_fabricant
+				inner join article a on a.id_marque = m.id_marque
+								inner join ventes v on v.id_article = a.id_article
+where v.ANNEE = 2014
+group by f.NOM_FABRICANT
+;
+
+-- 26. Donner l’ID, le nom, le volume et la quantité vendue des 20 articles les plus vendus en 2016.
+
+select
+	a.ID_ARTICLE
+    , a.NOM_ARTICLE
+    , a.VOLUME
+    , sum(v.QUANTITE) quantité_vendue
+from article a inner join ventes v using(id_article)
+where v.ANNEE = 2016
+group by a.ID_ARTICLE, a.NOM_ARTICLE, a.VOLUME
+order by quantité_vendue desc
+limit 20
+;
+
+-- 27. Donner l’ID, le nom, le volume et la quantité vendue des 5 ‘Trappistes’ les plus vendus en 2016.
+
+select
+	a.ID_ARTICLE
+    , a.NOM_ARTICLE
+    , a.VOLUME
+    , sum(v.QUANTITE) quantité_vendue
+from article a inner join ventes v using(id_article)
+				inner join type t using(id_type)
+where v.ANNEE = 2016 
+and t.NOM_TYPE = "Trappiste"
+group by a.ID_ARTICLE, a.NOM_ARTICLE, a.VOLUME
+order by quantité_vendue desc
+limit 5
+;
+
+-- 28. Donner l’ID, le nom, le volume et les quantités vendues en 2015 et 2016, des bières
+-- dont les ventes ont été stables. (Moins de 1% de variation)
+
+select
+	a.ID_ARTICLE
+    , a.NOM_ARTICLE
+    , a.VOLUME
+    
+from article a inner join
+
+ (select 
+	sum(v.QUANTITE) 
+from article a inner join ventes v using(id_article)
+where v.ANNEE = 2015
+group by a.ID_ARTICLE) quantité_2015 
+
+inner join
+
+(select 
+	sum(v.QUANTITE) 
+from article a inner join ventes v using(id_article)
+where v.ANNEE = 2016
+group by a.ID_ARTICLE) quantité_2016 
+
+
+group by a.ID_ARTICLE, a.NOM_ARTICLE, a.VOLUME
+
+;
+
+
+
+-- 29. Lister les types de bières suivant l’évolution de leurs ventes entre 2015 et 2016.
+-- Classer le résultat par ordre décroissant des performances.     
+
+
+
+-- 30. Existe-t-il des tickets sans vente ?
+
+select *
+from ticket
+where DATE_VENTE is null;
+
+-- 31. Lister les produits vendus en 2016 dans des quantités jusqu’à -15% des quantités de l’article le plus vendu.
+
