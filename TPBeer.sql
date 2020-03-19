@@ -1,17 +1,8 @@
 -- 1. Quels sont les tickets qui comportent l’article d’ID 500, afficher le numéro de ticket uniquement ?
 
-select t.NUMERO_TICKET
-from ticket t,
-article a,
-ventes v
-where t.NUMERO_TICKET = v.NUMERO_TICKET
-and v.ID_ARTICLE = a.ID_ARTICLE 
-and a.id_article = 50;
-
-select t.numero_ticket
-from ventes v inner join ticket t on t.NUMERO_TICKET = v.NUMERO_TICKET
-	inner join article a on v.ID_ARTICLE = a.ID_ARTICLE 
-where a.id_article = 50;
+select v.numero_ticket
+from ventes v 
+where v.id_article = 50;
 
 -- 2. Afficher les tickets du 15/01/2014.
 
@@ -86,3 +77,6 @@ group by a.ID_ARTICLE
 , a.NOM_ARTICLE
 order by quantité_totale desc
 ;
+
+-- 11. Lister chaque ticket pour lequel la quantité totale d’articles vendus est supérieure à 500. (Classer par quantité décroissante)
+
