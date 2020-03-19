@@ -68,7 +68,7 @@ where c.id_couleur is null
 
 -- 10. Lister pour chaque ticket la quantité totale d’articles vendus. (Classer par quantité décroissante)
 
-select a.id_article
+/*select a.id_article
 , a.nom_article
 , sum( v.QUANTITE) quantité_totale
 from ventes v inner join ticket t on t.NUMERO_TICKET = v.NUMERO_TICKET
@@ -76,7 +76,39 @@ from ventes v inner join ticket t on t.NUMERO_TICKET = v.NUMERO_TICKET
 group by a.ID_ARTICLE
 , a.NOM_ARTICLE
 order by quantité_totale desc
+;*/
+
+select v.ID_ARTICLE
+, sum(v.QUANTITE) quantité_totale
+from ventes v
+group by v.ID_ARTICLE
+order by quantité_totale desc
 ;
 
 -- 11. Lister chaque ticket pour lequel la quantité totale d’articles vendus est supérieure à 500. (Classer par quantité décroissante)
 
+select  t.NUMERO_TICKET
+, sum(v.QUANTITE) quantité_totale
+from ventes v inner join ticket t on t.NUMERO_TICKET = v.NUMERO_TICKET
+	inner join article a on v.ID_ARTICLE = a.ID_ARTICLE
+ group by t.NUMERO_TICKET
+ having sum(v.QUANTITE) > 500
+ order by quantité_totale desc
+;
+
+-- 12. Lister chaque ticket pour lequel la quantité totale d’articles vendus est supérieure à 500. 
+-- On exclura du total, les ventes ayant une quantité supérieure à 50 (classer par quantité décroissante)
+
+select  t.NUMERO_TICKET
+, sum(v.QUANTITE) quantité_totale
+from ventes v inner join ticket t on t.NUMERO_TICKET = v.NUMERO_TICKET
+	inner join article a on v.ID_ARTICLE = a.ID_ARTICLE
+where v.QUANTITE in
+		(select
+		v.QUANTITE
+		from ventes v 
+		where v.QUANTITE < 50)
+group by t.NUMERO_TICKET
+having quantité_totale > 500
+order by quantité_totale desc
+;
