@@ -44,8 +44,8 @@ where t.date_vente between "2014-03-01" and "2014-04-30";
 select t.numero_ticket
 , t.DATE_VENTE
 from ticket t
-where t.date_vente like "2014-03-%%" 
-or t.DATE_VENTE like "2014-06-%%";
+where t.date_vente like "2014-03-%" 
+or t.DATE_VENTE like "2014-06-%";
 
 -- 8. Afficher la liste des bières classée par couleur. (Afficher l’id et le nom)
 
@@ -60,9 +60,9 @@ order by c.NOM_COULEUR
 
 select a.id_article
 , a.nom_article
-, c.id_couleur
-from couleur c right join article a on a.id_couleur = c.id_couleur
-where c.id_couleur is null
+, a.id_couleur
+from article a 
+where a.id_couleur is null
 ;
 
 -- 10. Lister pour chaque ticket la quantité totale d’articles vendus. (Classer par quantité décroissante)
@@ -84,7 +84,7 @@ group by v.ID_ARTICLE
 order by quantité_totale desc
 ;
 
--- 11. Lister chaque ticket pour lequel la quantité totale d’articles vendus est supérieure à 500. (Classer par quantité décroissante)
+-- 11. Lister chaque ticket pour lequel la quantité totale d’articles vendus est supérieure à 500. (Classer par quantité décroissante) utiliser que ventes
 
 select  t.NUMERO_TICKET
 , sum(v.QUANTITE) quantité_totale
@@ -98,18 +98,16 @@ from ventes v inner join ticket t on t.NUMERO_TICKET = v.NUMERO_TICKET
 -- 12. Lister chaque ticket pour lequel la quantité totale d’articles vendus est supérieure à 500. 
 -- On exclura du total, les ventes ayant une quantité supérieure à 50 (classer par quantité décroissante)
 
--- à revoir !
 select
-t.NUMERO_TICKET
+v.NUMERO_TICKET
 , sum(v.QUANTITE) quantité_totale
-from ventes v inner join ticket t on t.NUMERO_TICKET = v.NUMERO_TICKET
-	inner join article a on v.ID_ARTICLE = a.ID_ARTICLE
+from ventes v 
 where v.QUANTITE in
 		(select
 		v.QUANTITE
 		from ventes v 
-		where v.QUANTITE <= 50)
-group by t.NUMERO_TICKET
+		where v.QUANTITE < 50)
+group by v.NUMERO_TICKET
 having quantité_totale > 500
 order by quantité_totale desc
 ;
@@ -150,10 +148,10 @@ group by v.ANNEE
 , v.NUMERO_TICKET
 ;
 
--- 17. Donner le C.A. par année.
+-- 17. Donner le C.A. par année. 
 
 select v.annee
-, sum((a.PRIX_ACHAT + (a.PRIX_ACHAT * 0.15)) * v.QUANTITE) CA
+, round (sum((a.PRIX_ACHAT + (a.PRIX_ACHAT * 0.15)) * v.QUANTITE), 2) CA
 from ventes v inner join article a on v.id_article = a.id_article
 group by v.ANNEE
 ;
@@ -179,18 +177,13 @@ or v.ANNEE = 2015
 or v.ANNEE = 2016
 group by v.ANNEE
 	, v.ID_ARTICLE
-order by v.ANNEE
-	, v.ID_ARTICLE
 ;
 
--- 20. Lister les articles qui n’ont fait l’objet d’aucune vente en 2014
+-- 20. Lister les articles qui n’ont fait l’objet d’aucune vente en 2014 
 
-select v.ID_ARTICLE
+select distinct v.ID_ARTICLE
 from ventes v
-where v.ANNEE <> 2014
-group by v.ANNEE
-	, v.ID_ARTICLE
-order by v.ID_ARTICLE
+where v.ID_ARTICLE not in (select v1.ID_ARTICLE from ventes v1 where v1.ANNEE = 2014) 
 ;
 
 -- 21. Coder de 3 manières différentes la requête suivante : Lister les pays qui fabriquent des bières de type ‘Trappiste’.
@@ -263,7 +256,7 @@ group by c.NOM_COULEUR
 
 select
 	f.NOM_FABRICANT
-    , count(v.NUMERO_TICKET) nb_tickets
+    , count(distinct v.NUMERO_TICKET) nb_tickets
 from marque m inner join fabricant f on f.id_fabricant = m.id_fabricant
 				inner join article a on a.id_marque = m.id_marque
 								inner join ventes v on v.id_article = a.id_article
@@ -308,29 +301,33 @@ select
 	a.ID_ARTICLE
     , a.NOM_ARTICLE
     , a.VOLUME
+    , sum(v.QUANTITE) quantité
     
 from article a inner join
 
  (select 
-	sum(v.QUANTITE) 
-from article a inner join ventes v using(id_article)
-where v.ANNEE = 2015
-group by a.ID_ARTICLE) quantité_2015 
+	sum(v1.QUANTITE) s1
+from article a1 inner join ventes v1 using(id_article)
+where v1.ANNEE = 2015
+group by a1.ID_ARTICLE) as ventes2015 
 
 inner join
 
 (select 
-	sum(v.QUANTITE) 
-from article a inner join ventes v using(id_article)
-where v.ANNEE = 2016
-group by a.ID_ARTICLE) quantité_2016 
+	sum(v2.QUANTITE) s2
+from article a2 inner join ventes v2 using(id_article)
+where v2.ANNEE = 2016
+group by a2.ID_ARTICLE) as ventes2016
 
+inner join
 
+ventes v using(id_article)
+where (s2.ventes2016 - s1.ventes2015) / s1.ventes2015 < 0.01
 group by a.ID_ARTICLE, a.NOM_ARTICLE, a.VOLUME
 
+-- having (s2.ventes_2016 - s1.ventes_2015) / s1.ventes_2015 < 0.01
+
 ;
-
-
 
 -- 29. Lister les types de bières suivant l’évolution de leurs ventes entre 2015 et 2016.
 -- Classer le résultat par ordre décroissant des performances.     
