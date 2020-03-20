@@ -384,3 +384,27 @@ having quantité <= (0.85 * (select max(s.sum2016)
 					)
 ;
 
+-- 32. Appliquer une augmentation de tarif de 10% pour toutes les bières ‘Trappistes’ de couleur ‘Blonde’
+
+update article,
+(select a.ID_ARTICLE
+from couleur c inner join article a using(id_couleur)
+							inner join type t using(ID_TYPE) 
+where t.nom_type = "Trappiste"
+and c.NOM_COULEUR = "Blonde") as trappiste
+set article.PRIX_ACHAT = article.PRIX_ACHAT * 1.1
+where article.ID_ARTICLE = trappiste.id_article
+;
+
+/*
+select a.ID_ARTICLE
+		, a.PRIX_ACHAT
+from couleur c inner join article a using(id_couleur)
+							inner join type t using(ID_TYPE) 
+where t.nom_type = "Trappiste"
+and c.NOM_COULEUR = "Blonde";
+*/
+
+-- 33. Mettre à jour le degré d’alcool des toutes les bières n’ayant pas cette information. On y
+-- mettra le degré d’alcool de la moins forte des bières du même type et de même couleur
+
