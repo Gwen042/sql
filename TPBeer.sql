@@ -301,61 +301,64 @@ select
 	a.ID_ARTICLE
     , a.NOM_ARTICLE
     , a.VOLUME
-    , sum(v.QUANTITE) quantité
-    
+	, v1.sum2015
+    , v2.sum2016
+    , sum(v.quantite) as quantité_totale
 from article a inner join
 
- (select 
-	sum(v1.QUANTITE) s1
-from article a1 inner join ventes v1 using(id_article)
-where v1.ANNEE = 2015
-group by a1.ID_ARTICLE) as ventes2015 
-
-inner join
-
-(select 
-	sum(v2.QUANTITE) s2
-from article a2 inner join ventes v2 using(id_article)
-where v2.ANNEE = 2016
-group by a2.ID_ARTICLE) as ventes2016
-
-inner join
-
-ventes v using(id_article)
-
-where (s2.ventes2016 - s1.ventes2015) / s1.ventes2015 < 0.01
-
-group by a.ID_ARTICLE, a.NOM_ARTICLE, a.VOLUME
-
--- having (s2.ventes_2016 - s1.ventes_2015) / s1.ventes_2015 < 0.01
-
-;
-
-select
-	a.ID_ARTICLE
-    , a.NOM_ARTICLE
-    , a.VOLUME
-    , v.sum2015    
-from article a inner join
-
- (select 
-	ventes.ID_ARTICLE
-	,sum(ventes.QUANTITE) as sum2015
-from ventes
-where ventes.ANNEE = 2015
-group by ventes.ID_ARTICLE) as  v
-
- on a.ID_ARTICLE = v.ID_ARTICLE
+						(select 
+							ventes.ID_ARTICLE
+							,sum(ventes.QUANTITE) as sum2015
+						from ventes
+						where ventes.ANNEE = 2015
+						group by ventes.ID_ARTICLE) as  v1 using(ID_ARTICLE)
  
- group by 	a.ID_ARTICLE
-    , a.NOM_ARTICLE
-    , a.VOLUME
+							inner join 
+                            
+						(select 
+							ventes.ID_ARTICLE
+							,sum(ventes.QUANTITE) as sum2016
+						from ventes
+						where ventes.ANNEE = 2016
+						group by ventes.ID_ARTICLE) as  v2 using(ID_ARTICLE)    
+                        
+									inner join                                    
+										ventes v using(id_article)
+								
+group by 	a.ID_ARTICLE, a.NOM_ARTICLE, a.VOLUME
+having (v2.sum2016 - v1.sum2015) / v1.sum2015 < 0.01
 ;
 
 
 -- 29. Lister les types de bières suivant l’évolution de leurs ventes entre 2015 et 2016.
 -- Classer le résultat par ordre décroissant des performances.     
 
+select
+	t.ID_TYPE
+	, t.NOM_TYPE
+--	, v1.sum2015
+--    , v2.sum2016
+    , round((v2.sum2016 - v1.sum2015) / v1.sum2015) as evolution
+from type t inner join article a using(id_type) 
+							inner join
+								(select 
+									ventes.ID_ARTICLE
+									,sum(ventes.QUANTITE) as sum2015
+								from ventes
+								where ventes.ANNEE = 2015
+								group by ventes.ID_ARTICLE) as  v1 using(ID_ARTICLE)
+ 
+								inner join 
+									(select 
+										ventes.ID_ARTICLE
+										,sum(ventes.QUANTITE) as sum2016
+									from ventes
+									where ventes.ANNEE = 2016
+									group by ventes.ID_ARTICLE) as  v2 using(ID_ARTICLE)    
+                                    
+group by 	a.ID_ARTICLE, a.NOM_ARTICLE, a.VOLUME
+order by evolution  desc
+;
 
 
 -- 30. Existe-t-il des tickets sans vente ?
