@@ -322,12 +322,36 @@ group by a2.ID_ARTICLE) as ventes2016
 inner join
 
 ventes v using(id_article)
+
 where (s2.ventes2016 - s1.ventes2015) / s1.ventes2015 < 0.01
+
 group by a.ID_ARTICLE, a.NOM_ARTICLE, a.VOLUME
 
 -- having (s2.ventes_2016 - s1.ventes_2015) / s1.ventes_2015 < 0.01
 
 ;
+
+select
+	a.ID_ARTICLE
+    , a.NOM_ARTICLE
+    , a.VOLUME
+    , v.sum2015    
+from article a inner join
+
+ (select 
+	ventes.ID_ARTICLE
+	,sum(ventes.QUANTITE) as sum2015
+from ventes
+where ventes.ANNEE = 2015
+group by ventes.ID_ARTICLE) as  v
+
+ on a.ID_ARTICLE = v.ID_ARTICLE
+ 
+ group by 	a.ID_ARTICLE
+    , a.NOM_ARTICLE
+    , a.VOLUME
+;
+
 
 -- 29. Lister les types de bières suivant l’évolution de leurs ventes entre 2015 et 2016.
 -- Classer le résultat par ordre décroissant des performances.     
