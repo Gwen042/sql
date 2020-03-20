@@ -387,11 +387,11 @@ having quantité <= (0.85 * (select max(s.sum2016)
 -- 32. Appliquer une augmentation de tarif de 10% pour toutes les bières ‘Trappistes’ de couleur ‘Blonde’
 
 update article,
-(select a.ID_ARTICLE
-from couleur c inner join article a using(id_couleur)
-							inner join type t using(ID_TYPE) 
-where t.nom_type = "Trappiste"
-and c.NOM_COULEUR = "Blonde") as trappiste
+	(select a.ID_ARTICLE
+	from couleur c inner join article a using(id_couleur)
+								inner join type t using(ID_TYPE) 
+	where t.nom_type = "Trappiste"
+	and c.NOM_COULEUR = "Blonde") as trappiste
 set article.PRIX_ACHAT = article.PRIX_ACHAT * 1.1
 where article.ID_ARTICLE = trappiste.id_article
 ;
@@ -408,3 +408,30 @@ and c.NOM_COULEUR = "Blonde";
 -- 33. Mettre à jour le degré d’alcool des toutes les bières n’ayant pas cette information. On y
 -- mettra le degré d’alcool de la moins forte des bières du même type et de même couleur
 
+/*
+select article.ID_ARTICLE
+	, article.TITRAGE
+from article
+where article.TITRAGE is null;
+
+select min(article.TITRAGE)
+		, ID_Couleur
+        , ID_TYPE
+from article
+group by ID_Couleur, ID_TYPE;
+
+select titrage_null.TITRAGE
+		, titrage_null.id_couleur
+        , titrage_null.ID_TYPE
+		, min(article.TITRAGE)
+		, article.ID_Couleur
+        , article.ID_TYPE
+from article inner join 
+						(select article.ID_ARTICLE
+								, article.TITRAGE
+                                , article.ID_Couleur
+                                , article.ID_TYPE
+						from article
+						where article.TITRAGE is null) titrage_null using(id_article)
+group by article.ID_Couleur, article.ID_TYPE;
+*/
