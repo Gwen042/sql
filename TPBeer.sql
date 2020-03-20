@@ -369,3 +369,18 @@ where DATE_VENTE is null;
 
 -- 31. Lister les produits vendus en 2016 dans des quantités jusqu’à -15% des quantités de l’article le plus vendu.
 
+select a.ID_ARTICLE
+		, a.NOM_ARTICLE
+		, sum(v.QUANTITE) quantité
+from article a inner join ventes v using(id_article)
+where v.ANNEE = 2016
+group by a.id_article, a.nom_article
+having quantité <= (0.85 * (select max(s.sum2016) 
+							from (select sum(v1.QUANTITE) sum2016
+								from ventes v1
+								where v1.ANNEE = 2016 
+								group by v1.ID_ARTICLE) s
+							)
+					)
+;
+
